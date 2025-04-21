@@ -3,16 +3,17 @@ import numpy as np
 from stable_baselines3 import DQN
 
 
-def evaluate(model, env, n_eval_episodes=10):
+def evaluate(model, env, n_eval_episodes=10, render=True):
     rewards = []
     for _ in range(n_eval_episodes):
-        obs, _ = env.reset()
+        obs = env.reset()
         done = False
         episode_reward = 0
         while not done:
+            if render:
+                env.render()
             action, _ = model.predict(obs, deterministic=True)
-            obs, reward, terminated, truncated, info = env.step(action)
-            done = terminated or truncated
+            obs, reward, done, _ = env.step(action)
             episode_reward += reward
         rewards.append(episode_reward)
     mean_reward = np.mean(rewards)
@@ -20,12 +21,11 @@ def evaluate(model, env, n_eval_episodes=10):
 
 
 def main():
-    # 创建环境并指定渲染模式
-    env = gym.make("CartPole-v1", render_mode="human")
+    # 创建环境
+    env = gym.make("CartPole-v1")
 
     # 创建模型
-    # model = DQN("MlpPolicy", env, verbose=1)
-    model = DQN("MlpPolicy", env, verbose=0, tensorboard_log="./tensorboard/")
+    model = DQN("MlpPolicy", env, verbose=1, tensorboard_log="./tensorboard/")
 
     total_timesteps = 50000
     eval_interval = 10000  # 每训练多少步评估一次
@@ -53,4 +53,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main() 
